@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class Tile : MonoBehaviour
 {
     public int Value { get; private set; }
-    public Vector2 Position { get; private set; }
+    public Node OccupiedNode { get; private set; }
 
     private Image _image;
     private TextMeshProUGUI _text;
@@ -28,6 +28,9 @@ public class Tile : MonoBehaviour
     {
         _text.SetText(text);
     }
-    
-    
+
+    public void SetNode(Node node)
+    {
+        OccupiedNode = node;
+    }
 }
