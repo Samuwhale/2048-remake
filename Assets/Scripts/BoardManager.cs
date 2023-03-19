@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class BoardManager : MonoBehaviour
 {
+    public static BoardManager Instance;
+
     [SerializeField] private int _gridSize;
 
     [SerializeField] private float _tileSize;
@@ -18,9 +21,15 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private Transform _nodePrefab;
 
     private List<Node> _nodes = new List<Node>();
+    private List<Tile> _tiles = new List<Tile>();
 
     private Vector3 _viewportCenter;
 
+    private void Awake()
+    {
+        if (Instance != null) return;
+        Instance = this;
+    }
 
     void Start()
     {
@@ -68,6 +77,33 @@ public class BoardManager : MonoBehaviour
         List<Node> emptyNodes = _nodes.Where(node => !node.HasTile()).ToList();
         int randomIndex = Random.Range(0, emptyNodes.Count);
         var node = emptyNodes[randomIndex];
-        node.SpawnTile();
+        var tile = node.SpawnTile();
+        _tiles.Add(tile);
+    }
+
+
+    private Node GetNodeAtGridPosition(int x, int y)
+    {
+        return _nodes.FirstOrDefault(node => node.GridPosition == new Vector2(x, y));
+    }
+
+    [Button("MoveTile()", ButtonSizes.Small)]
+    void MoveTile()
+    {
+        for (int y = 0; y < _gridSize; y++)
+        {
+            for (int x = 0; x < _gridSize; x++)
+            {
+                var node = GetNodeAtGridPosition(x, y);
+                if (node.HasTile())
+                {
+                    Debug.Log($"Node at {x}x,{y}y has value {node.CurrentTile.Value}");
+                }
+                else
+                {
+                    Debug.Log($"Node at {x}x,{y}y is empty.");
+                }
+            }
+        }
     }
 }

@@ -302,3 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d649f99778bc4d4c8e870af13eacf3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _spawnValues: 020000000400000008000000
+  _valueColorsSo: {fileID: 11400000, guid: 848e59863573e4084b3cd1ca50411163, type: 2}
+  _spriteRenderer: {fileID: 3284171559284669868}
+  _text: {fileID: 249575934649669888}

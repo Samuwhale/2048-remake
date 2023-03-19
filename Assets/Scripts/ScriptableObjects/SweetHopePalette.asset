@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e72836a9ce1844ca8ad258b61b62b0eb, type: 3}
-  m_Name: SweetHope
+  m_Name: SweetHopePalette
   m_EditorClassIdentifier: 
   PurpleDark: {r: 0.38039216, g: 0.36862746, b: 0.52156866, a: 0}
   PurpleLight: {r: 0.6117647, g: 0.5529412, b: 0.7607843, a: 0}
