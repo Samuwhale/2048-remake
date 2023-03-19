@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Sirenix.OdinInspector;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -87,23 +88,119 @@ public class BoardManager : MonoBehaviour
         return _nodes.FirstOrDefault(node => node.GridPosition == new Vector2(x, y));
     }
 
-    [Button("MoveTile()", ButtonSizes.Small)]
-    void MoveTile()
+
+    public void MoveTiles(Vector2 direction)
     {
-        for (int y = 0; y < _gridSize; y++)
+        int startX, startY;
+        int endX, endY;
+        int stepY, stepX;
+
+
+        if (direction.x > 0)
         {
-            for (int x = 0; x < _gridSize; x++)
+            startX = _gridSize - 1;
+            endX = -1;
+            stepX = -1;
+        }
+        else
+        {
+            startX = 0;
+            endX = _gridSize;
+            stepX = 1;
+        }
+
+        if (direction.y > 0)
+        {
+            startY = _gridSize - 1;
+            endY = -1;
+            stepY = -1;
+        }
+        else
+        {
+            startY = 0;
+            endY = _gridSize;
+            stepY = 1;
+        }
+
+
+        for (int y = startY; y != endY; y = y + stepY)
+        {
+            for (int x = startX; x != endX; x = x + stepX)
             {
                 var node = GetNodeAtGridPosition(x, y);
                 if (node.HasTile())
                 {
-                    Debug.Log($"Node at {x}x,{y}y has value {node.CurrentTile.Value}");
-                }
-                else
-                {
-                    Debug.Log($"Node at {x}x,{y}y is empty.");
+                    TryMove(node.CurrentTile, direction, node.GridPosition);
                 }
             }
         }
+    }
+
+    // these functions can PROBABLY be moved into a single one that just iterates using the direction
+    void TryMove(Tile tile, Vector2 direction, Vector2 position)
+    {
+        if (direction.x != 0) TryMoveHorizontal(tile, direction, position);
+        if (direction.y != 0) TryMoveVertical(tile, direction, position);
+    }
+
+    void TryMoveVertical(Tile tile, Vector2 direction, Vector2 position)
+    {
+        int end = direction.y > 0 ? _gridSize : -1;
+        int step = (int)direction.y;
+        int start = (int)position.y + step;
+
+        if (0 > start || start > _gridSize - 1)
+        {
+            Debug.Log($"Tile is at border ({tile.OccupiedNode.GridPosition})");
+            return;
+        }
+
+        Node targetNode = tile.OccupiedNode;
+        for (int y = start; y != end; y += step)
+        {
+            Node potentialNode = GetNodeAtGridPosition((int)position.x, y);
+            if (potentialNode.HasTile())
+            {
+                break;
+            }
+
+            targetNode = potentialNode;
+        }
+
+        MoveTile(tile, targetNode);
+    }
+
+    void TryMoveHorizontal(Tile tile, Vector2 direction, Vector2 position)
+    {
+        int end = direction.x > 0 ? _gridSize : -1;
+        int step = (int)direction.x;
+        int start = (int)position.x + step;
+
+        if (0 > start || start > _gridSize - 1)
+        {
+            Debug.Log($"Tile is at border ({tile.OccupiedNode.GridPosition})");
+            return;
+        }
+
+        Node targetNode = tile.OccupiedNode;
+        for (int x = start; x != end; x += step)
+        {
+            Node potentialNode = GetNodeAtGridPosition(x, (int)position.y);
+            if (potentialNode.HasTile())
+            {
+                break;
+            }
+
+            targetNode = potentialNode;
+        }
+
+        MoveTile(tile, targetNode);
+    }
+
+    void MoveTile(Tile tile, Node targetNode)
+    {
+        Debug.Log($"{tile.Value} at {tile.OccupiedNode.GridPosition} moved to {targetNode.GridPosition}");
+        tile.OccupiedNode.ClearTile();
+        targetNode.SetTile(tile);
     }
 }

@@ -53,9 +53,5 @@ public class Tile : MonoBehaviour
     {
         OccupiedNode = node;
     }
-
-    private void MoveTile(Vector2 direction)
-    {
-        //
-    }
+    
 }

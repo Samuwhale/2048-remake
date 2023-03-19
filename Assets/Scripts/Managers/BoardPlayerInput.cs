@@ -13,8 +13,9 @@ public class BoardPlayerInput : MonoBehaviour
         _inputReader.MoveEvent += InputReader_OnMoveEvent;
     }
 
-    private void InputReader_OnMoveEvent(Vector2 obj)
+    private void InputReader_OnMoveEvent(Vector2 direction)
     {
-        //
+        if (direction == Vector2.up || direction == Vector2.down || direction == Vector2.right ||
+            direction == Vector2.left) { BoardManager.Instance.MoveTiles(direction);}
     }
 }
