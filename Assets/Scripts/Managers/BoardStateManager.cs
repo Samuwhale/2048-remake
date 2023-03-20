@@ -6,7 +6,9 @@ using UnityEngine.Serialization;
 
 public class BoardStateManager : MonoBehaviour
 {
-    public BoardStateManager Instance { get; private set; }
+    public static BoardStateManager Instance { get; private set; }
+
+    public event Action OnNewRoundStarted;
 
     public enum Phase
     {
@@ -93,6 +95,7 @@ public class BoardStateManager : MonoBehaviour
         {
             case Phase.SpawnTile:
                 BoardManager.Instance.SpawnTile();
+                OnNewRoundStarted?.Invoke();
                 SwitchState(Phase.Input);
                 break;
             case Phase.Input:

@@ -14,20 +14,27 @@ public class Tile : MonoBehaviour
     public int Value { get; private set; }
     [SerializeField] private int[] _spawnValues;
     [SerializeField] private ValueColorsSO _valueColorsSo;
-    [SerializeField] private float _tileAnimateSpeed = 0.2f;
-    
+    [SerializeField] private float _tileAnimateSpeed = 0.15f;
+
+    public TileVisual TileVisual { get; private set; }
+
     public Node OccupiedNode { get; private set; }
 
 
-    [FormerlySerializedAs("_image")] [SerializeField]
-    private SpriteRenderer _spriteRenderer;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
 
     [SerializeField] private TextMeshPro _text;
 
 
+    private void Awake()
+    {
+        TileVisual = GetComponent<TileVisual>();
+    }
+
     private void Start()
     {
         InitializeValue();
+        TileVisual.PlaySpawnAnimation();
     }
 
     void InitializeValue()
@@ -74,16 +81,18 @@ public class Tile : MonoBehaviour
     public void DeleteSelf()
     {
         OccupiedNode.ClearTile();
+        Debug.Log($"{this} on {gameObject} has been destroyed.");
         Destroy(gameObject);
     }
 
     public void MergeWith(Tile tileToMergeInto)
     {
         tileToMergeInto.DoubleValue();
+        tileToMergeInto.TileVisual.PlayMergeAnimation();
         MoveTo(tileToMergeInto.transform.position, DeleteSelf);
     }
 
-    
+
     public void MoveTo(Vector3 targetPosition, TweenCallback onComplete = null)
     {
         transform.DOMove(targetPosition, _tileAnimateSpeed).OnComplete(onComplete);

@@ -23,6 +23,7 @@ public class BoardManager : MonoBehaviour
 
     private List<Node> _nodes = new List<Node>();
     private List<Tile> _tiles = new List<Tile>();
+    private List<Node> _nodesCurrentlyOfflimit = new List<Node>();
 
     public event Action OnMoveComplete;
     public event Action OnGameWon;
@@ -96,6 +97,7 @@ public class BoardManager : MonoBehaviour
         int startX, startY;
         int endX, endY;
         int stepY, stepX;
+        _nodesCurrentlyOfflimit.Clear();
 
 
         if (direction.x > 0)
@@ -141,67 +143,46 @@ public class BoardManager : MonoBehaviour
         //EndTurn();
     }
 
-    // these functions can PROBABLY be moved into a single one that just iterates using the direction
+
     void TryMove(Tile tile, Vector2 direction, Vector2 position)
     {
-        if (direction.x != 0) TryMoveHorizontal(tile, direction, position);
-        if (direction.y != 0) TryMoveVertical(tile, direction, position);
-    }
+        int endY = direction.y > 0 ? _gridSize : -1;
+        int stepY = (int)direction.y;
+        int startY = (int)position.y + stepY;
+        int y = startY;
 
-    void TryMoveVertical(Tile tile, Vector2 direction, Vector2 position)
-    {
-        int end = direction.y > 0 ? _gridSize : -1;
-        int step = (int)direction.y;
-        int start = (int)position.y + step;
-
-        if (0 > start || start > _gridSize - 1)
-        {
-            return;
-        }
+        int endX = direction.x > 0 ? _gridSize : -1;
+        int stepX = (int)direction.x;
+        int startX = (int)position.x + stepX;
+        int x = startX;
 
         Node targetNode = tile.OccupiedNode;
-        for (int y = start; y != end; y += step)
-        {
-            Node potentialNode = GetNodeAtGridPosition((int)position.x, y);
-            if (potentialNode.HasTile())
-            {
-                // check merge
-                if (TryMerge(tile, potentialNode)) return;
-                break;
-            }
 
-            targetNode = potentialNode;
-        }
-
-        MoveTile(tile, targetNode);
-    }
-
-    void TryMoveHorizontal(Tile tile, Vector2 direction, Vector2 position)
-    {
-        int end = direction.x > 0 ? _gridSize : -1;
-        int step = (int)direction.x;
-        int start = (int)position.x + step;
-
-        if (0 > start || start > _gridSize - 1)
-        {
-            return;
-        }
+        bool wasMergeSuccesful = false;
         
-        Node targetNode = tile.OccupiedNode;
-        for (int x = start; x != end; x += step)
+        while (x != endX && y != endY)
         {
-            Node potentialNode = GetNodeAtGridPosition(x, (int)position.y);
+            Node potentialNode = GetNodeAtGridPosition(x, y);
+            
+            Debug.Log($"potentialNode == null : {(potentialNode == null)}");
+            Debug.Log($"potentialNode.GetNodeWasMerged() : {(potentialNode.GetNodeWasMerged())}");
+            Debug.Log($"potentialNode.HasTile() : {(potentialNode.HasTile())}");
+            if (potentialNode == null) break;
+
+            if (potentialNode.GetNodeWasMerged()) break;
+            
             if (potentialNode.HasTile())
             {
-                // check merge
-                if (TryMerge(tile, potentialNode)) return;
+                wasMergeSuccesful = TryMerge(tile, potentialNode);
                 break;
             }
 
             targetNode = potentialNode;
+            x += stepX;
+            y += stepY;
         }
 
-        MoveTile(tile, targetNode);
+        if (!wasMergeSuccesful) MoveTile(tile, targetNode);
     }
 
     private bool TryMerge(Tile tile, Node potentialNode)
@@ -209,6 +190,7 @@ public class BoardManager : MonoBehaviour
         var potentialMergableTile = potentialNode.GetTile();
         if (tile.Value == potentialMergableTile.Value)
         {
+            potentialNode.SetNodeAsMerged();
             _tiles.Remove(tile);
             tile.MergeWith(potentialMergableTile);
             return true;
@@ -220,6 +202,8 @@ public class BoardManager : MonoBehaviour
     void MoveTile(Tile tile, Node targetNode)
     {
         // Debug.Log($"{tile.Value} at {tile.OccupiedNode.GridPosition} moved to {targetNode.GridPosition}");
+        if (tile == targetNode.GetTile()) return;
+        
         tile.OccupiedNode.ClearTile();
         targetNode.SetTile(tile);
     }

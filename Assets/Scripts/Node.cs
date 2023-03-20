@@ -12,10 +12,31 @@ public class Node : MonoBehaviour
     public Vector2 GridPosition { get; private set; }
 
     [SerializeField] private Transform _tilePrefab;
-    
+
+    private bool _mergedThisTurn;
 
     public Tile _currentTile;
 
+    private void Start()
+    {
+        BoardStateManager.Instance.OnNewRoundStarted += BoardStateManager_OnNewRoundStarted;
+    }
+
+    private void BoardStateManager_OnNewRoundStarted()
+    {
+        _mergedThisTurn = false;
+    }
+
+    public bool GetNodeWasMerged()
+    {
+        return _mergedThisTurn;
+    }
+
+    public void SetNodeAsMerged()
+    {
+        _mergedThisTurn = true;
+    }
+    
     public void AssignTile(Tile tile)
     {
         _currentTile = tile;
