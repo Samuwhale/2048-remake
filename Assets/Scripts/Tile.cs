@@ -80,21 +80,21 @@ public class Tile : MonoBehaviour
 
     public void DeleteSelf()
     {
+        TileVisual.PlayDeleteAnimation();
         OccupiedNode.ClearTile();
-        Debug.Log($"{this} on {gameObject} has been destroyed.");
-        Destroy(gameObject);
+        Destroy(gameObject, 0.1f);
     }
 
     public void MergeWith(Tile tileToMergeInto)
     {
         tileToMergeInto.DoubleValue();
         tileToMergeInto.TileVisual.PlayMergeAnimation();
-        MoveTo(tileToMergeInto.transform.position, DeleteSelf);
+        DeleteSelf();
+        MoveTo(tileToMergeInto.transform.position);
     }
-
-
-    public void MoveTo(Vector3 targetPosition, TweenCallback onComplete = null)
+    
+    public void MoveTo(Vector3 targetPosition)
     {
-        transform.DOMove(targetPosition, _tileAnimateSpeed).OnComplete(onComplete);
+        transform.DOMove(targetPosition, _tileAnimateSpeed);
     }
 }

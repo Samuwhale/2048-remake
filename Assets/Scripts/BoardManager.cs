@@ -97,7 +97,6 @@ public class BoardManager : MonoBehaviour
         int startX, startY;
         int endX, endY;
         int stepY, stepX;
-        _nodesCurrentlyOfflimit.Clear();
 
 
         if (direction.x > 0)
@@ -140,11 +139,10 @@ public class BoardManager : MonoBehaviour
         }
 
         OnMoveComplete?.Invoke();
-        //EndTurn();
     }
 
 
-    void TryMove(Tile tile, Vector2 direction, Vector2 position)
+    bool TryMove(Tile tile, Vector2 direction, Vector2 position)
     {
         int endY = direction.y > 0 ? _gridSize : -1;
         int stepY = (int)direction.y;
@@ -157,23 +155,26 @@ public class BoardManager : MonoBehaviour
         int x = startX;
 
         Node targetNode = tile.OccupiedNode;
-
-        bool wasMergeSuccesful = false;
         
+
         while (x != endX && y != endY)
         {
             Node potentialNode = GetNodeAtGridPosition(x, y);
-            
-            Debug.Log($"potentialNode == null : {(potentialNode == null)}");
-            Debug.Log($"potentialNode.GetNodeWasMerged() : {(potentialNode.GetNodeWasMerged())}");
+
+            Debug.Log($"potentialNode.GetNodeWasMerged() : {(potentialNode.GetNodeWasMergedThisTurn())}");
             Debug.Log($"potentialNode.HasTile() : {(potentialNode.HasTile())}");
             if (potentialNode == null) break;
 
-            if (potentialNode.GetNodeWasMerged()) break;
-            
+            if (potentialNode.GetNodeWasMergedThisTurn()) break;
+
             if (potentialNode.HasTile())
             {
-                wasMergeSuccesful = TryMerge(tile, potentialNode);
+                if (potentialNode.GetTile().Value == tile.Value)
+                {
+                    Merge(tile, potentialNode);
+                    return false;
+                }
+
                 break;
             }
 
@@ -182,28 +183,23 @@ public class BoardManager : MonoBehaviour
             y += stepY;
         }
 
-        if (!wasMergeSuccesful) MoveTile(tile, targetNode);
+        MoveTile(tile, targetNode);
+        return true;
     }
 
-    private bool TryMerge(Tile tile, Node potentialNode)
+    private void Merge(Tile tile, Node potentialNode)
     {
-        var potentialMergableTile = potentialNode.GetTile();
-        if (tile.Value == potentialMergableTile.Value)
-        {
-            potentialNode.SetNodeAsMerged();
-            _tiles.Remove(tile);
-            tile.MergeWith(potentialMergableTile);
-            return true;
-        }
-
-        return false;
+        potentialNode.SetNodeAsMerged();
+        var tileToMerge = potentialNode.GetTile();
+        tile.MergeWith(tileToMerge);
+        _tiles.Remove(tile);
     }
 
     void MoveTile(Tile tile, Node targetNode)
     {
         // Debug.Log($"{tile.Value} at {tile.OccupiedNode.GridPosition} moved to {targetNode.GridPosition}");
         if (tile == targetNode.GetTile()) return;
-        
+
         tile.OccupiedNode.ClearTile();
         targetNode.SetTile(tile);
     }

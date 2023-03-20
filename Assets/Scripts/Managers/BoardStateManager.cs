@@ -6,8 +6,8 @@ using UnityEngine.Serialization;
 
 public class BoardStateManager : MonoBehaviour
 {
-    public static BoardStateManager Instance { get; private set; }
-
+    public static BoardStateManager Instance { get; private set; } 
+    public Phase CurrentPhase { get; private set; }
     public event Action OnNewRoundStarted;
 
     public enum Phase
@@ -32,7 +32,7 @@ public class BoardStateManager : MonoBehaviour
 
     private void BoardManager_OnReadyForNextTurn()
     {
-        if (currentPhase == Phase.EndOfTurn)
+        if (CurrentPhase == Phase.EndOfTurn)
         {
             SwitchState(Phase.SpawnTile);
         }
@@ -40,7 +40,7 @@ public class BoardStateManager : MonoBehaviour
 
     private void BoardManager_OnGameLost()
     {
-        if (currentPhase == Phase.EndOfTurn)
+        if (CurrentPhase == Phase.EndOfTurn)
         {
             SwitchState(Phase.GameOver);
         }
@@ -57,7 +57,7 @@ public class BoardStateManager : MonoBehaviour
 
     private void BoardManager_OnMoveComplete()
     {
-        if (currentPhase == Phase.Move)
+        if (CurrentPhase == Phase.Move)
         {
             SwitchState(Phase.EndOfTurn);
         }
@@ -65,7 +65,7 @@ public class BoardStateManager : MonoBehaviour
 
     private void BoardPlayerInput_OnValidInputReceived(Vector2 direction)
     {
-        if (currentPhase == Phase.Input)
+        if (CurrentPhase == Phase.Input)
         {
             SwitchState(Phase.Move);
             BoardManager.Instance.MoveTiles(direction);
@@ -78,24 +78,29 @@ public class BoardStateManager : MonoBehaviour
         Instance = this;
     }
 
-    public Phase currentPhase;
+
 
     public void SwitchState(Phase newPhase)
     {
-        if (currentPhase != newPhase)
+        Debug.Log($"SwitchState({newPhase}) was called. Currently in {CurrentPhase}");
+        if (CurrentPhase != newPhase)
         {
-            currentPhase = newPhase;
+            Debug.Log($"Switched to ({newPhase})");
+            CurrentPhase = newPhase;
             EnterState(newPhase);
         }
+        
     }
 
     public void EnterState(Phase newPhase)
     {
+        Debug.Log($"Entering ({newPhase})");
         switch (newPhase)
         {
             case Phase.SpawnTile:
-                BoardManager.Instance.SpawnTile();
+                Debug.Log($"OnNewRoundStarted invoked");
                 OnNewRoundStarted?.Invoke();
+                BoardManager.Instance.SpawnTile();
                 SwitchState(Phase.Input);
                 break;
             case Phase.Input:

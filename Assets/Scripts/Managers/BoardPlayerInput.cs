@@ -28,7 +28,6 @@ public class BoardPlayerInput : MonoBehaviour
             direction == Vector2.left)
         {
             OnValidInputReceived?.Invoke(direction);
-            
         }
     }
 }

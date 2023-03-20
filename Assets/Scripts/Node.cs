@@ -13,7 +13,7 @@ public class Node : MonoBehaviour
 
     [SerializeField] private Transform _tilePrefab;
 
-    private bool _mergedThisTurn;
+    private bool _tileWaMergedThisTurn;
 
     public Tile _currentTile;
 
@@ -24,23 +24,22 @@ public class Node : MonoBehaviour
 
     private void BoardStateManager_OnNewRoundStarted()
     {
-        _mergedThisTurn = false;
+        Debug.Log($"BoardStateManager_OnNewRoundStarted() {GridPosition} tileMerged {_tileWaMergedThisTurn} -> false");
+        _tileWaMergedThisTurn = false;
     }
 
-    public bool GetNodeWasMerged()
+    public bool GetNodeWasMergedThisTurn()
     {
-        return _mergedThisTurn;
+        Debug.Log($"GetNodeWasMergedThisTurn() {GridPosition} tileMerged {_tileWaMergedThisTurn}");
+        return _tileWaMergedThisTurn;
     }
 
     public void SetNodeAsMerged()
     {
-        _mergedThisTurn = true;
+        Debug.Log($"SetNodeAsMerged() {GridPosition} tileMerged {_tileWaMergedThisTurn} -> true");
+        _tileWaMergedThisTurn = true;
     }
     
-    public void AssignTile(Tile tile)
-    {
-        _currentTile = tile;
-    }
 
     public bool HasTile()
     {
@@ -59,10 +58,13 @@ public class Node : MonoBehaviour
 
     public void SetTile(Tile tile)
     {
-        if (tile == _currentTile) return;
-        tile.transform.SetParent(transform);
         tile.MoveTo(transform.position);
+        
+        tile.transform.SetParent(transform);
+        
+        
         _currentTile = tile;
+        
         tile.SetNode(this);
     }
 
