@@ -24,6 +24,12 @@ public class BoardManager : MonoBehaviour
     private List<Node> _nodes = new List<Node>();
     private List<Tile> _tiles = new List<Tile>();
 
+    public event Action OnMoveComplete;
+    public event Action OnGameWon;
+    public event Action OnGameLost;
+
+    public event Action OnReadyForNextTurn;
+
     private Vector3 _viewportCenter;
 
     private void Awake()
@@ -36,13 +42,9 @@ public class BoardManager : MonoBehaviour
     {
         _viewportCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
         GenerateBoard(_gridSize);
+        SpawnTile();
     }
 
-    [Button("GenerateBoard()", ButtonSizes.Small)]
-    void GenerateBoardDebug()
-    {
-        GenerateBoard(_gridSize);
-    }
 
     void GenerateBoard(int gridSize)
     {
@@ -64,7 +66,7 @@ public class BoardManager : MonoBehaviour
     }
 
     [Button("SpawnTile()", ButtonSizes.Small)]
-    void SpawnTile()
+    public void SpawnTile()
     {
         bool gridHasSpace = _nodes.Any(node => !node.HasTile());
 
@@ -130,10 +132,13 @@ public class BoardManager : MonoBehaviour
                 var node = GetNodeAtGridPosition(x, y);
                 if (node.HasTile())
                 {
-                    TryMove(node.CurrentTile, direction, node.GridPosition);
+                    TryMove(node.GetTile(), direction, node.GridPosition);
                 }
             }
         }
+
+        OnMoveComplete?.Invoke();
+        //EndTurn();
     }
 
     // these functions can PROBABLY be moved into a single one that just iterates using the direction
@@ -151,7 +156,6 @@ public class BoardManager : MonoBehaviour
 
         if (0 > start || start > _gridSize - 1)
         {
-            Debug.Log($"Tile is at border ({tile.OccupiedNode.GridPosition})");
             return;
         }
 
@@ -161,6 +165,8 @@ public class BoardManager : MonoBehaviour
             Node potentialNode = GetNodeAtGridPosition((int)position.x, y);
             if (potentialNode.HasTile())
             {
+                // check merge
+                if (TryMerge(tile, potentialNode)) return;
                 break;
             }
 
@@ -178,16 +184,17 @@ public class BoardManager : MonoBehaviour
 
         if (0 > start || start > _gridSize - 1)
         {
-            Debug.Log($"Tile is at border ({tile.OccupiedNode.GridPosition})");
             return;
         }
-
+        
         Node targetNode = tile.OccupiedNode;
         for (int x = start; x != end; x += step)
         {
             Node potentialNode = GetNodeAtGridPosition(x, (int)position.y);
             if (potentialNode.HasTile())
             {
+                // check merge
+                if (TryMerge(tile, potentialNode)) return;
                 break;
             }
 
@@ -197,10 +204,43 @@ public class BoardManager : MonoBehaviour
         MoveTile(tile, targetNode);
     }
 
+    private bool TryMerge(Tile tile, Node potentialNode)
+    {
+        var potentialMergableTile = potentialNode.GetTile();
+        if (tile.Value == potentialMergableTile.Value)
+        {
+            _tiles.Remove(tile);
+            tile.MergeWith(potentialMergableTile);
+            return true;
+        }
+
+        return false;
+    }
+
     void MoveTile(Tile tile, Node targetNode)
     {
-        Debug.Log($"{tile.Value} at {tile.OccupiedNode.GridPosition} moved to {targetNode.GridPosition}");
+        // Debug.Log($"{tile.Value} at {tile.OccupiedNode.GridPosition} moved to {targetNode.GridPosition}");
         tile.OccupiedNode.ClearTile();
         targetNode.SetTile(tile);
+    }
+
+
+    public void ShouldGameEnd()
+    {
+        if (_tiles.Any(tile => tile.Value == 2048))
+        {
+            Debug.Log("GAME ENDED: WON");
+            OnGameWon?.Invoke();
+            return;
+        }
+
+        if (_nodes.Any(node => !node.HasTile()) == false)
+        {
+            Debug.Log("GAME ENDED: LOST");
+            OnGameLost?.Invoke();
+            return;
+        }
+
+        OnReadyForNextTurn?.Invoke();
     }
 }

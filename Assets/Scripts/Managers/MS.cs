@@ -8,20 +8,28 @@ public class MS : MonoBehaviour
 {
     public static MS Main { get; private set; }
 
-    public GameManager GameManager { get; private set; }
-    public UIManager UIManager { get; private set; }
+    [SerializeField]  GameManager _gameManager;
+    [SerializeField]  UIManager _uIManager;
     
-    public EventManager EventManager { get; private set; }
-    public AudioManager AudioManager { get; private set; }
+    [SerializeField]  EventManager _eventManager;
+    [SerializeField]  AudioManager _audioManager;
+
+    public GameManager GameManager => _gameManager;
+
+    public UIManager UIManager => _uIManager;
+
+    public EventManager EventManager => _eventManager;
+
+    public AudioManager AudioManager => _audioManager;
 
 
-    private void Start()
+    private void Awake()
     {
         if (Main == null)
         {
             Main = this;
             DontDestroyOnLoad(this);
-            GetSingletonComponentsInChildren();
+            
         }
         else
         {
@@ -29,13 +37,5 @@ public class MS : MonoBehaviour
         }
     }
 
-    void GetSingletonComponentsInChildren()
-    {
-        
-        GameManager = GetComponentInChildren<GameManager>();
-        UIManager = GetComponentInChildren<UIManager>();
-        EventManager = GetComponentInChildren<EventManager>();
-        AudioManager = GetComponentInChildren<AudioManager>();
-
-    }
+    
 }

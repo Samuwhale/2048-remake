@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -13,6 +14,8 @@ public class Tile : MonoBehaviour
     public int Value { get; private set; }
     [SerializeField] private int[] _spawnValues;
     [SerializeField] private ValueColorsSO _valueColorsSo;
+    [SerializeField] private float _tileAnimateSpeed = 0.2f;
+    
     public Node OccupiedNode { get; private set; }
 
 
@@ -31,6 +34,19 @@ public class Tile : MonoBehaviour
     {
         Value = _spawnValues[Random.Range(0, _spawnValues.Length)];
         UpdateVisuals();
+    }
+
+    void DoubleValue()
+    {
+        if (Value < 2048)
+        {
+            Value *= 2;
+            UpdateVisuals();
+        }
+        else
+        {
+            Debug.Log($"Tile already full");
+        }
     }
 
     public void UpdateVisuals()
@@ -53,5 +69,23 @@ public class Tile : MonoBehaviour
     {
         OccupiedNode = node;
     }
+
+
+    public void DeleteSelf()
+    {
+        OccupiedNode.ClearTile();
+        Destroy(gameObject);
+    }
+
+    public void MergeWith(Tile tileToMergeInto)
+    {
+        tileToMergeInto.DoubleValue();
+        MoveTo(tileToMergeInto.transform.position, DeleteSelf);
+    }
+
     
+    public void MoveTo(Vector3 targetPosition, TweenCallback onComplete = null)
+    {
+        transform.DOMove(targetPosition, _tileAnimateSpeed).OnComplete(onComplete);
+    }
 }

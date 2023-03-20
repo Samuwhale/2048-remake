@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class Node : MonoBehaviour
@@ -11,18 +12,23 @@ public class Node : MonoBehaviour
     public Vector2 GridPosition { get; private set; }
 
     [SerializeField] private Transform _tilePrefab;
-    [SerializeField] private float _tileAnimateSpeed = 0.2f;
+    
 
-    public Tile CurrentTile { get; private set; }
+    public Tile _currentTile;
 
     public void AssignTile(Tile tile)
     {
-        CurrentTile = tile;
+        _currentTile = tile;
     }
 
     public bool HasTile()
     {
-        return CurrentTile != null;
+        return _currentTile != null;
+    }
+
+    public Tile GetTile()
+    {
+        return _currentTile;
     }
     
     public void SetGridPosition(int x, int y)
@@ -32,9 +38,10 @@ public class Node : MonoBehaviour
 
     public void SetTile(Tile tile)
     {
+        if (tile == _currentTile) return;
         tile.transform.SetParent(transform);
-        tile.transform.DOMove(transform.position, _tileAnimateSpeed);
-        CurrentTile = tile;
+        tile.MoveTo(transform.position);
+        _currentTile = tile;
         tile.SetNode(this);
     }
 
@@ -48,6 +55,6 @@ public class Node : MonoBehaviour
 
     public void ClearTile()
     {
-        CurrentTile = null;
+        _currentTile = null;
     }
 }
