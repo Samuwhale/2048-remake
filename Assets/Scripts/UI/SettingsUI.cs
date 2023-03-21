@@ -143,9 +143,9 @@ using UnityEngine.UI;
         }
 
         private void UpdateVisuals() {
-            _masterButtonText.SetText($"Master: {MS.Main.AudioManager.MasterVolume:F1}");
-            _musicButtonText.SetText($"Music: {MS.Main.AudioManager.MusicVolume:F1}");
-            _sfxButtonText.SetText($"Sfx: {MS.Main.AudioManager.SfxVolume:F1}");
+            _masterButtonText.SetText($"Master: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.MasterVolume):F1}%");
+            _musicButtonText.SetText($"Music: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.MusicVolume):F1}%");
+            _sfxButtonText.SetText($"Sfx: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.SfxVolume):F1}%");
         
             _moveUpButtonText.SetText(_inputReader.GetBindingKeyString(InputReader.Binding.MoveUp));
             _moveDownButtonText.SetText(_inputReader.GetBindingKeyString(InputReader.Binding.MoveDown));

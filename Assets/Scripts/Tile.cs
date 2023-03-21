@@ -25,7 +25,8 @@ public class Tile : MonoBehaviour
 
     [SerializeField] private TextMeshPro _text;
 
-    public static event Action<int> OnTileMerge; 
+    public static event Action<int> OnTileMerge;
+    public static event Action OnTile2048;
 
     private void Awake()
     {
@@ -51,10 +52,11 @@ public class Tile : MonoBehaviour
             Value *= 2;
             UpdateVisuals();
             OnTileMerge?.Invoke(Value);
-        }
-        else
-        {
-            Debug.Log($"Tile already full");
+            if (Value >= 2048)
+            {
+                OnTile2048?.Invoke();
+                transform.DOShakePosition(0.5f, new Vector3(0.2f, 0.2f, 0.2f));
+            }
         }
     }
 
@@ -94,7 +96,7 @@ public class Tile : MonoBehaviour
         DeleteSelf();
         MoveTo(tileToMergeInto.transform.position);
     }
-    
+
     public void MoveTo(Vector3 targetPosition)
     {
         transform.DOMove(targetPosition, _tileAnimateSpeed);

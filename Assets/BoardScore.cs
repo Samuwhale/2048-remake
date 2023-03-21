@@ -8,9 +8,12 @@ public class BoardScore : MonoBehaviour
 
     public static BoardScore Instance;
 
-    private int _score;
+    private int _score = 0;
+    private int _hiScore = 0;
 
     public event Action<int> OnScoreChanged; 
+    public event Action<int> OnHighScoreChanged; 
+    
     
     private void Start()
     {
@@ -20,21 +23,41 @@ public class BoardScore : MonoBehaviour
 
     private void GameManager_OnGameReset()
     {
-        _score = 0;
-        OnScoreChanged?.Invoke(_score);
+        SetScore(0);
     }
 
+    
+    
+    
     private void Tile_OnTileMerge(int score)
     {
-        _score += score;
-        OnScoreChanged?.Invoke(_score);
+        SetScore(_score + score);
+        
     }
 
     public int GetScore()
     {
         return _score;
     }
-    
+
+    public int GetHighScore()
+    {
+        return _hiScore;
+    }
+
+    void SetScore(int score)
+    {
+        _score = score;
+        if (_score > _hiScore)
+        {
+            _hiScore = score;
+            PlayerPrefs.SetInt("HighScore", _hiScore);
+            PlayerPrefs.Save();
+            OnHighScoreChanged?.Invoke(_hiScore);
+        }
+        
+        OnScoreChanged?.Invoke(_score);
+    }
 
     private void Awake()
     {
@@ -42,5 +65,7 @@ public class BoardScore : MonoBehaviour
         {
             Instance = this;
         }
+
+        _hiScore = PlayerPrefs.GetInt("HighScore", 0);
     }
 }

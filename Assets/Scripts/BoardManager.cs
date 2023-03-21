@@ -182,7 +182,7 @@ public class BoardManager : MonoBehaviour
 
             if (potentialNode.HasTile())
             {
-                if (potentialNode.GetTile().Value == tile.Value)
+                if (potentialNode.GetTile().Value == tile.Value && tile.Value != 2048)
                 {
                     Merge(tile, potentialNode);
                     return false;
@@ -220,12 +220,12 @@ public class BoardManager : MonoBehaviour
 
     public void ShouldGameEnd()
     {
-        if (_tiles.Any(tile => tile.Value == 2048))
-        {
-            Debug.Log("GAME ENDED: WON");
-            OnGameWon?.Invoke();
-            return;
-        }
+        // if (_tiles.Any(tile => tile.Value == 2048))
+        // {
+        //     Debug.Log("GAME ENDED: WON");
+        //     OnGameWon?.Invoke();
+        //     return;
+        // }
 
         if (_nodes.Any(node => !node.HasTile()) == false)
         {
