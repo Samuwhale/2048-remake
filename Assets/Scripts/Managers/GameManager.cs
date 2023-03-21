@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
         Playing,
         Menu,
         GameOver,
+        GameWon,
         Empty
     }
     
@@ -26,6 +27,12 @@ public class GameManager : MonoBehaviour
     public event Action<States> OnGameStateChanged;
     public event Action OnGamePaused;
     public event Action OnGameResumed;
+
+    public event Action OnGameReset;
+    
+    public event Action GameWon;
+    
+    public event Action GameLost;
     
 
     public bool IsPaused { get; private set; } 
@@ -37,6 +44,18 @@ public class GameManager : MonoBehaviour
     {
         _inputReader.PauseEvent += InputReader_OnPauseEvent;
         _inputReader.UnpauseEvent += InputReader_OnUnpauseEvent;
+        BoardManager.Instance.OnGameLost += BoardManager_OnGameLost;
+        BoardManager.Instance.OnGameWon += BoardManager_OnGameWon;
+    }
+
+    private void BoardManager_OnGameWon()
+    {
+        SwitchState(States.GameWon);
+    }
+
+    private void BoardManager_OnGameLost()
+    {
+        SwitchState(States.GameOver);
     }
 
     private void InputReader_OnPauseEvent()
@@ -49,6 +68,13 @@ public class GameManager : MonoBehaviour
         TryResume();
     }
 
+
+    public void ResetGame()
+    {
+        SwitchState(States.Playing);
+        OnGameReset?.Invoke();
+    }
+    
     public void TryResume()
     {
         if (!IsPaused) return;
@@ -68,10 +94,16 @@ public class GameManager : MonoBehaviour
     private void UpdateFromState(States state) {
         switch (state) {
             case States.Playing:
+                
                 break;
             case States.Menu:
+                
                 break;
             case States.GameOver:
+                
+                break;
+            case States.GameWon:
+                
                 break;
             case States.Empty:
                 break;
@@ -83,10 +115,18 @@ public class GameManager : MonoBehaviour
     private void EnterState(States state) {
         switch (state) {
             case States.Playing:
+                _inputReader.SwitchToGameplay(); 
                 break;
             case States.Menu:
+                _inputReader.SwitchToUI(); 
                 break;
             case States.GameOver:
+                _inputReader.SwitchToUI();
+                GameLost?.Invoke();
+                break;
+            case States.GameWon:
+                _inputReader.SwitchToUI();
+                GameWon?.Invoke();
                 break;
             case States.Empty:
                 break;

@@ -23,8 +23,9 @@ public class BoardManager : MonoBehaviour
 
     private List<Node> _nodes = new List<Node>();
     private List<Tile> _tiles = new List<Tile>();
-    private List<Node> _nodesCurrentlyOfflimit = new List<Node>();
 
+    public event Action OnBoardReset;
+    
     public event Action OnMoveComplete;
     public event Action OnGameWon;
     public event Action OnGameLost;
@@ -41,9 +42,21 @@ public class BoardManager : MonoBehaviour
 
     void Start()
     {
+        MS.Main.GameManager.OnGameReset += GameManager_ResetGame;
         _viewportCenter = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
         GenerateBoard(_gridSize);
         SpawnTile();
+    }
+    
+    private void GameManager_ResetGame()
+    {
+        foreach (var node in _nodes)
+        {
+            node.ResetNode();
+        }
+        
+        _tiles.Clear();
+        OnBoardReset?.Invoke();
     }
 
 

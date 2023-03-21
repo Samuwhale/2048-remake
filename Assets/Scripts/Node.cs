@@ -28,6 +28,12 @@ public class Node : MonoBehaviour
         _tileWaMergedThisTurn = false;
     }
 
+    public void ResetNode()
+    {
+        if (HasTile()) GetTile().DeleteSelf();
+        _tileWaMergedThisTurn = false;
+    }
+    
     public bool GetNodeWasMergedThisTurn()
     {
         Debug.Log($"GetNodeWasMergedThisTurn() {GridPosition} tileMerged {_tileWaMergedThisTurn}");
@@ -78,6 +84,7 @@ public class Node : MonoBehaviour
 
     public void ClearTile()
     {
+        // if (HasTile()) GetTile().DeleteSelf();
         _currentTile = null;
     }
 }

@@ -7,7 +7,7 @@ public class TileVisual : MonoBehaviour
     [SerializeField] private Animator _animator;
     private static readonly int MergeTrigger = Animator.StringToHash("MergeTrigger");
     private static readonly int SpawnTrigger = Animator.StringToHash("SpawnTrigger");
-    private static readonly int DestroyTrigger = Animator.StringToHash("DestroyTrigger");
+    private static readonly int DeleteTrigger = Animator.StringToHash("DeleteTrigger");
 
 
     public void PlayMergeAnimation()
@@ -21,7 +21,7 @@ public class TileVisual : MonoBehaviour
     
     public void PlayDeleteAnimation()
     {
-        _animator.SetTrigger(DestroyTrigger);
+        _animator.SetTrigger(DeleteTrigger);
     }
 
 }

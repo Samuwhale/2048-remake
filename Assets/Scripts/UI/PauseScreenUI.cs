@@ -12,6 +12,7 @@ public class PauseScreenUI : MonoBehaviour
     [SerializeField] private GameObject _visibilityObject;
     [SerializeField] private Button _resumeGameButton;
     [SerializeField] private Button _toSettingsButton;
+    [SerializeField] private Button _restartButton;
     [SerializeField] private Button _exitToMenuButton;
 
 
@@ -20,6 +21,13 @@ public class PauseScreenUI : MonoBehaviour
         _resumeGameButton.onClick.AddListener(ResumeGamePressed);
         _toSettingsButton.onClick.AddListener(ToSettingsPressed);
         _exitToMenuButton.onClick.AddListener(ExitToMenuPressed);
+        _restartButton.onClick.AddListener(RestartButtonPressed);
+    }
+
+    private void RestartButtonPressed()
+    {
+        MS.Main.GameManager.ResetGame();
+        Hide();
     }
 
 
@@ -41,6 +49,7 @@ public class PauseScreenUI : MonoBehaviour
     private void ResumeGamePressed()
     {
         MS.Main.GameManager.TryResume();
+        Hide();
     }
 
     private void ExitToMenuPressed()

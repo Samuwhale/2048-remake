@@ -25,6 +25,7 @@ public class Tile : MonoBehaviour
 
     [SerializeField] private TextMeshPro _text;
 
+    public static event Action<int> OnTileMerge; 
 
     private void Awake()
     {
@@ -49,6 +50,7 @@ public class Tile : MonoBehaviour
         {
             Value *= 2;
             UpdateVisuals();
+            OnTileMerge?.Invoke(Value);
         }
         else
         {
@@ -82,7 +84,7 @@ public class Tile : MonoBehaviour
     {
         TileVisual.PlayDeleteAnimation();
         OccupiedNode.ClearTile();
-        Destroy(gameObject, 0.1f);
+        Destroy(gameObject, 0.3f);
     }
 
     public void MergeWith(Tile tileToMergeInto)

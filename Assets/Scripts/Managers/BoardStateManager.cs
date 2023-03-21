@@ -6,17 +6,19 @@ using UnityEngine.Serialization;
 
 public class BoardStateManager : MonoBehaviour
 {
-    public static BoardStateManager Instance { get; private set; } 
+    public static BoardStateManager Instance { get; private set; }
     public Phase CurrentPhase { get; private set; }
     public event Action OnNewRoundStarted;
+    public event Action OnBoardGameOver;
 
     public enum Phase
     {
+        ResettingBoard,
         SpawnTile,
         Input,
         Move,
         EndOfTurn,
-        GameOver,
+        EndOfGame,
     }
 
     private void Start()
@@ -26,8 +28,24 @@ public class BoardStateManager : MonoBehaviour
         BoardManager.Instance.OnReadyForNextTurn += BoardManager_OnReadyForNextTurn;
         BoardManager.Instance.OnGameLost += BoardManager_OnGameLost;
         BoardManager.Instance.OnGameWon += BoardManager_OnGameWon;
+        BoardManager.Instance.OnBoardReset += BoardManager_OnBoardReset;
+        MS.Main.GameManager.OnGameReset += GameManager_ResetGame;
         
+
         SwitchState(Phase.Input);
+    }
+
+    private void BoardManager_OnBoardReset()
+    {
+        if (CurrentPhase == Phase.ResettingBoard)
+        {
+            SwitchState(Phase.SpawnTile);
+        }
+    }
+
+    private void GameManager_ResetGame()
+    {
+        SwitchState(Phase.ResettingBoard);
     }
 
     private void BoardManager_OnReadyForNextTurn()
@@ -40,19 +58,12 @@ public class BoardStateManager : MonoBehaviour
 
     private void BoardManager_OnGameLost()
     {
-        if (CurrentPhase == Phase.EndOfTurn)
-        {
-            SwitchState(Phase.GameOver);
-        }
+        SwitchState(Phase.EndOfGame);
     }
 
     private void BoardManager_OnGameWon()
     {
-        // if (currentPhase == Phase.EndOfTurn)
-        // {
-                // WIN!!! 
-        // }
-        throw new NotImplementedException();
+        SwitchState(Phase.EndOfGame);
     }
 
     private void BoardManager_OnMoveComplete()
@@ -79,7 +90,6 @@ public class BoardStateManager : MonoBehaviour
     }
 
 
-
     public void SwitchState(Phase newPhase)
     {
         Debug.Log($"SwitchState({newPhase}) was called. Currently in {CurrentPhase}");
@@ -89,7 +99,6 @@ public class BoardStateManager : MonoBehaviour
             CurrentPhase = newPhase;
             EnterState(newPhase);
         }
-        
     }
 
     public void EnterState(Phase newPhase)
@@ -97,6 +106,8 @@ public class BoardStateManager : MonoBehaviour
         Debug.Log($"Entering ({newPhase})");
         switch (newPhase)
         {
+            case Phase.ResettingBoard:
+                break;
             case Phase.SpawnTile:
                 Debug.Log($"OnNewRoundStarted invoked");
                 OnNewRoundStarted?.Invoke();
@@ -110,8 +121,8 @@ public class BoardStateManager : MonoBehaviour
             case Phase.EndOfTurn:
                 BoardManager.Instance.ShouldGameEnd();
                 break;
-            case Phase.GameOver:
-                Debug.Log("YOU LOST");
+            case Phase.EndOfGame:
+                
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newPhase), newPhase, null);

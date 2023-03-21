@@ -16,18 +16,31 @@ public class GameOverUI : MonoBehaviour {
 
     private void Start()
     {
+        MS.Main.GameManager.GameLost += GameManager_OnGameLost;
+        MS.Main.GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
         Hide();
+    }
+
+    private void GameManager_OnGameStateChanged(GameManager.States currentState)
+    {
+        if (currentState != GameManager.States.GameOver) Hide();
+    }
+
+    private void GameManager_OnGameLost()
+    {
+        Show();
     }
 
 
     void OnPlayAgainClicked() {
-        
+        MS.Main.GameManager.ResetGame();
     }
     
     
 
     public void Show()
     {
+        
         _visibilityObject.SetActive(true);
     }
     
